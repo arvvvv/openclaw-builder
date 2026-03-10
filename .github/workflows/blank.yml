@@ -1,0 +1,44 @@
+name: Build OpenClaw
+
+on:
+  workflow_dispatch:  # 手动触发
+  schedule:
+    - cron: '0 0 * * *'  # 每天自动构建
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        
+    - name: Install OpenClaw
+      run: |
+        npm install -g openclaw@latest --omit=optional
+        npm root -g
+        
+    - name: Package OpenClaw
+      run: |
+        OPENCLAW_PATH=$(npm root -g)/openclaw
+        echo "OpenClaw installed at: $OPENCLAW_PATH"
+        tar -czf openclaw-linux-x64.tar.gz -C $(npm root -g) openclaw
+        
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: openclaw-linux-x64
+        path: openclaw-linux-x64.tar.gz
+        
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      if: github.event_name == 'workflow_dispatch'
+      with:
+        files: openclaw-linux-x64.tar.gz
+        tag_name: v2026.3.8
+        name: OpenClaw 2026.3.8 (Linux x64)
