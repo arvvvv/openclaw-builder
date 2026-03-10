@@ -1,13 +1,17 @@
 name: Build OpenClaw
 
 on:
-  workflow_dispatch:  # 手动触发
-  schedule:
-    - cron: '0 0 * * *'  # 每天自动构建
+  workflow_dispatch:
+
+permissions:
+  contents: write  # 添加这行
+  actions: read
+  packages: write
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    # ... 其余不变
     
     steps:
     - name: Checkout
